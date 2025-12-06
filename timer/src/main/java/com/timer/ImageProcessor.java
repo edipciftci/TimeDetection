@@ -21,35 +21,22 @@ public class ImageProcessor {
 
         int[] argb = img.getRGB(0, 0, width, height, null, 0, width);
 
-        int xPos = 0;
-        int yPos = 0;
+        int index = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
 
-        for (int pixel : argb) {
+                int pixel = argb[index++];
 
-            int r = (pixel >> 16) & 0xFF;
-            int g = (pixel >> 8)  & 0xFF;
-            int b =  pixel        & 0xFF;
+                int r = (pixel >>> 16) & 0xFF;
+                int g = (pixel >>> 8)  & 0xFF;
+                int b =  pixel         & 0xFF;
 
-            frame.setPixelRGBTable();
-            
-            xPos++;
-            yPos++;
-            xPos = xPos % width;
-            yPos = yPos % height;
+                int rgb = (r << 16) | (g << 8) | b;
+
+                frame.setPixelRGB(x, y, rgb);
+            }
         }
 
-
-        // int[] temp = img.getRGB(0, 0, width, height, null, 0, width);
-
-        // String str = "";
-        // for (int i = 0; i < temp.length; i=i+3) {
-        //     str += "Red:\t" + temp[i];
-        //     str += "\t\tBlue:\t" + temp[i+1];
-        //     str += "\t\tGreen:\t" + temp[i+2];
-        //     str += "\n";
-        // }
-
-        // System.out.println(str);
     }
 
 }
