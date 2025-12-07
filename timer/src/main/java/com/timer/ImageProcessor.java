@@ -41,7 +41,7 @@ public class ImageProcessor {
                 frame.setPixelRGB(x, y, rgb);
             }
         }
-        System.out.println("Here");
+        System.out.println(ID + " is added to the video object.");
     }
 
 }
