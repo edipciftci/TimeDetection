@@ -8,7 +8,11 @@ import javax.imageio.ImageIO;
 
 public class ImageProcessor {
 
-    public ImageProcessor(){}
+    private videoObject video;
+
+    public ImageProcessor(videoObject video){
+        this.video = video;
+    }
 
     public void processImage(String imgPath) throws IOException{
 
@@ -18,6 +22,7 @@ public class ImageProcessor {
         String[] parts = imgPath.split(File.separator);
         String ID = parts[parts.length - 1];
         Frame frame = new Frame(ID, width, height);
+        this.video.addFrame(frame);
 
         int[] argb = img.getRGB(0, 0, width, height, null, 0, width);
 
@@ -36,7 +41,7 @@ public class ImageProcessor {
                 frame.setPixelRGB(x, y, rgb);
             }
         }
-
+        System.out.println("Here");
     }
 
 }

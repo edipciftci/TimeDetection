@@ -19,12 +19,16 @@ public class VideoData implements AutoCloseable {
     private final FFmpegFrameGrabber grabber;
     private final Java2DFrameConverter converter;
     private long frameIndex = 0;
+    private String videoName;
+    private videoObject video;
 
     /**
      * Create VideoData from a File.
      */
-    public VideoData(String videoFilePath) throws Exception {
-        File videoFile = new File(videoFilePath);
+    public VideoData(videoObject video) throws Exception {
+        this.video = video;
+        File videoFile = new File(video.getVideoPath());
+        this.videoName = video.getVideoName();
         if (videoFile == null || !videoFile.exists()) {
             throw new IllegalArgumentException("Video file does not exist: " + videoFile);
         }
@@ -38,6 +42,8 @@ public class VideoData implements AutoCloseable {
         System.out.println("  Resolution: " + grabber.getImageWidth() + "x" + grabber.getImageHeight());
         System.out.println("  FPS: " + grabber.getVideoFrameRate());
         System.out.println("  Frames: " + grabber.getLengthInFrames());
+
+        this.video.setNumOfFrames(grabber.getLengthInFrames());
     }
 
     /**
@@ -82,7 +88,7 @@ public class VideoData implements AutoCloseable {
         int count = 0;
         BufferedImage frame;
         while ((frame = nextFrame()) != null) {
-            String fileName = String.format("frame_%06d.%s", count, imageFormat);
+            String fileName = String.format("%s_frame_%06d.%s", this.videoName, count, imageFormat);
             File outFile = outputDir.resolve(fileName).toFile();
             ImageIO.write(frame, imageFormat, outFile);
             count++;
@@ -106,20 +112,4 @@ public class VideoData implements AutoCloseable {
         converter.close();
     }
 
-    // Optional: quick CLI test
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage: java VideoData <videoFile> <outputDir>");
-            System.exit(1);
-        }
-
-        String videoPath = args[0];
-        Path outDir = Path.of(args[1]);
-
-        try (VideoData video = new VideoData(videoPath)) {
-            video.saveFramesAsImages(outDir, "png");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
