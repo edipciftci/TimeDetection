@@ -1,26 +1,22 @@
 package com.timer;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import javax.imageio.ImageIO;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
 /**
- * Wraps a video file and exposes it as a stream of image frames.
+ * VideoData class to handle video frame extraction using FFmpeg.
  */
 public class VideoData implements AutoCloseable {
 
-    private final FFmpegFrameGrabber grabber;
-    private final Java2DFrameConverter converter;
+    private final FFmpegFrameGrabber grabber;       // FFmpeg grabber used to pull raw frames
+    private final Java2DFrameConverter converter;   // Converter to turn FFmpeg frames into BufferedImages
 
     /**
-     * Create VideoData from a File.
+     * Constructor for VideoData
+     *
+     * @param video (videoObject) Target video container.
      */
     public VideoData(videoObject video) throws Exception {
         File videoFile = new File(video.getVideoPath());
@@ -44,54 +40,45 @@ public class VideoData implements AutoCloseable {
     /**
      * Get the next video frame as a BufferedImage.
      * Returns null when the video ends.
+     *
+     * @return (BufferedImage) Next frame image or null if stream ended.
      */
     public BufferedImage nextFrame() throws Exception {
-        Frame frame = grabber.grabImage();
-        if (frame == null) {
-            return null; // end of stream
-        }
-
-        BufferedImage img = converter.convert(frame);
-        if (img == null) {
+        try {
+            BufferedImage img = converter.convert(grabber.grabImage());
+            return img;
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
-
-        return img;
     }
 
     /**
-     * Convenience: turn the whole video into a sequence of image files.
+     * Iterate through the video, crop to the ROI, and hand frames to the processor.
      *
-     * @param outputDir   directory where images will be written
-     * @param imageFormat format for ImageIO (e.g. "png", "jpg")
-     * @return number of frames written
+     * @param boundaries (int[]) Region of interest boundaries [xi, yi, xf, yf]
+     * @param video (videoObject) Target video container
      */
-    public int saveFramesAsImages(Path outputDir, String imageFormat, int[] boundaries) throws Exception {
-        if (imageFormat == null || imageFormat.isEmpty()) {
-            throw new IllegalArgumentException("imageFormat must be non-empty (e.g. \"png\" or \"jpg\")");
+    public void getFrames(int[] boundaries, videoObject video) throws Exception{
+
+        int width = boundaries[2]-boundaries[0];
+        int height = boundaries[3]-boundaries[1];
+
+        ImageProcessor processor = video.getImageProcessor();
+
+        BufferedImage img;
+        com.timer.Frame tempFrame;
+        int ID = 0;
+        while ((img = nextFrame()) != null) {
+            tempFrame = new com.timer.Frame(String.format("FR_%06d", ID++), width, height, video);
+            processor.processImage(img.getSubimage(boundaries[0], boundaries[1], boundaries[2], boundaries[3]), tempFrame, width, height);
         }
 
-        // Make sure the directory exists
-        try {
-            Files.createDirectories(outputDir);
-        } catch (IOException e) {
-            throw new IOException("Could not create output directory: " + outputDir, e);
-        }
-
-        int count = 0;
-        BufferedImage frame;
-        while ((frame = nextFrame()) != null) {
-            String fileName = String.format("%s_frame_%06d.%s", this.videoName, count, imageFormat);
-            File outFile = outputDir.resolve(fileName).toFile();
-            ImageIO.write(frame.getSubimage(boundaries[0], boundaries[1], boundaries[2], boundaries[3]), imageFormat, outFile);
-            System.out.println("Frame " + count + " created");
-            count++;
-        }
-
-        System.out.println("Saved " + count + " frames to " + outputDir.toAbsolutePath());
-        return count;
     }
 
+    /**
+     * Release FFmpeg and converter resources.
+     */
     @Override
     public void close() throws Exception {
         grabber.stop();

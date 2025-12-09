@@ -1,85 +1,80 @@
 package com.timer;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
-
+/**
+ * Class for a video to hold and process its data and frames.
+ */
 public class videoObject {
 
-    private Frame[] frames;
-    private final String name, path, dirPath, type;
-    private int numOfFrames;
-    private int index = 0;
-    private int[] boundaries = new int[4]; // [xi, yi, xf, yf]
-    private ImageProcessor processor;
+    private Frame[] frames;                                                 // Frames of the video in order of appearance
+    private final String path, dirPath;
+    private int index = 0;                                                  // Frame insertion index
+    private int[] boundaries = new int[4];                                  // Region of interest boundaries [xi, yi, xf, yf]
+    private final ImageProcessor processor = new ImageProcessor(this);      // ImageProcessor used for all frames
 
-    public videoObject(String name, String path, String dirPath, String type, int[] boundaries){
-        this.name = name;
+    /**
+     * Constructor for videoObject
+     *
+     * @param name (String) Filename without extension.
+     * @param path (String) Absolute path to the video file.
+     * @param dirPath (String) Directory that stores the video and generated artifacts.
+     * @param type (String) File extension (e.g., mp4).
+     * @param boundaries (int[]) Crop bounds [xi, yi, xf, yf] used for frame extraction.
+     */
+    public videoObject(String path, String dirPath, int[] boundaries){
         this.path = path;
         this.dirPath = dirPath;
-        this.type = type;
         this.boundaries = boundaries;
     }
 
-    public String getVideoName(){return this.name;}
-
-    public String getTypedVideoName(){return this.name + "." + this.type;}
-
-    public String getVideoType(){return this.type;}
-
+    /**
+     * Getter for the path of the video
+     * @return (String)
+     */
     public String getVideoPath(){return this.path;}
 
+    /**
+     * Getter for the path of the video directory
+     * @return (String) Parent directory of the video.
+     */
     public String getVideoDirPath(){return this.dirPath;}
 
-    public void setNumOfFrames(int numOfFrames){
-        this.numOfFrames = numOfFrames;
-        this.frames = new Frame[numOfFrames];
-    }
+    /**
+     * Getter for the ImageProcessor of the video
+     * @return (ImageProcessor) Shared image processor instance.
+     */
+    public ImageProcessor getImageProcessor(){return this.processor;}
+    
+        /**
+         * Getter for the frames array.
+         * @return (Frame[])
+         */
+        public Frame[] getFrames(){return this.frames;}
 
+    /**
+     * Initialize storage for expected frame count.
+     * @param numOfFrames (int) Number of frames the video contains.
+     */
+    public void setNumOfFrames(int numOfFrames){this.frames = new Frame[numOfFrames];}
+
+    /**
+     * Append a frame object to frames array.
+     * @param frame (Frame) Frame to append.
+     */
     public void addFrame(Frame frame){
         this.frames[this.index] = frame;
         this.index++;
     }
 
-    public Frame[] getFrames(){return this.frames;}
+    /**
+     * Initialize a new VideoData instance to process and store frames.
+     * Use getFrames to extract frames from the video to store in this.frames.
+     * Close the VideoData instance after processing.
+     */
+    public void processImages() throws Exception{
 
-    public void getVideoData(){
-        try {
-            VideoData vidData = new VideoData(this);
-            String outDir = this.dirPath +  File.separator + "imageResults";
-            Path imagePath = Path.of(outDir);
-            vidData.saveFramesAsImages(imagePath, "png", this.boundaries);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void processImages() throws IOException{
-
-        if (this.processor == null){
-            this.processor = new ImageProcessor(this);
-        }
-
-        Path dir = Paths.get(this.dirPath + File.separator + "imageResults");
-
-        try (
-            Stream<String> names =
-            Files.list(dir)
-                .filter(Files::isRegularFile)
-                .map(p -> p.getFileName().toString())
-                .sorted()
-            ) {
-                names.forEach(img -> {
-                    try {
-                        processor.processImage(this.dirPath + File.separator + "imageResults" + File.separator + img);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
+        VideoData vidData = new VideoData(this);
+        vidData.getFrames(boundaries, this);
+        vidData.close();
     }
 
 }
