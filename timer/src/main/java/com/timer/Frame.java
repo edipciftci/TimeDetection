@@ -42,9 +42,15 @@ public class Frame {
 
     /**
      * Getter for the RGB pixel table.
-     * @return (int[]) Internal RGB buffer.
+     * @return (int[])
      */
     public int[] getPixelRGBTable(){return this.pixelRGBTable;}
+
+    /**
+     * Getter for the WBC pixel table.
+     * @return (int[])
+     */
+    public int[] getPixelWBCTable(){return this.pixelWBCTable;}
 
     /**
      * Setter for a single pixel's RGB and brightness.
@@ -78,29 +84,5 @@ public class Frame {
      * @return (String) Frame id.
      */
     public String getFrameID(){return this.FrameID;}
-    // TODO: Delete Later
-    /**
-     * Dump the white/black/color table to disk for debugging.
-     */
-    public void printWBCTable(){
-        String str = "\n\n";
-        for (int i = 0; i < this.height; i++) {
-            for (int j = 0; j < this.width; j++) {
-                if (this.pixelWBCTable[i*this.width+j] > -1){
-                    str += " ";
-                }
-                str += this.pixelWBCTable[i*this.width+j];
-            }
-            str += "\n";
-        }
-        
-        try  {
-            String outputFilePath = this.video.getVideoDirPath() + File.separator + "wbc_table.txt";
-            Files.writeString(java.nio.file.Paths.get(outputFilePath), str);
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-    }
 
 }

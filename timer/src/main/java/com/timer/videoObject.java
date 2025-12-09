@@ -44,11 +44,11 @@ public class videoObject {
      */
     public ImageProcessor getImageProcessor(){return this.processor;}
     
-        /**
-         * Getter for the frames array.
-         * @return (Frame[])
-         */
-        public Frame[] getFrames(){return this.frames;}
+    /**
+     * Getter for the frames array.
+     * @return (Frame[])
+     */
+    public Frame[] getFrames(){return this.frames;}
 
     /**
      * Initialize storage for expected frame count.
@@ -75,6 +75,79 @@ public class videoObject {
         VideoData vidData = new VideoData(this);
         vidData.getFrames(boundaries, this);
         vidData.close();
+    }
+
+    public void compareAllFrames(String method){
+        int currIndex = 0;
+        System.out.println("Comparing frames by " + method);
+        if (method.equals("RGB")){
+            while (currIndex + 1 < this.frames.length){
+                Frame current = this.frames[currIndex];
+                Frame next = this.frames[currIndex + 1];
+                this.compareFramesbyRGB(current, next);
+                currIndex++;
+            }
+            return;
+        }
+        if (method.equals("WBC")){
+            while (currIndex + 1 < this.frames.length){
+                Frame current = this.frames[currIndex];
+                Frame next = this.frames[currIndex + 1];
+                this.compareFramesbyWBC(current, next);
+                currIndex++;
+            }
+        }
+    }
+
+    public void compareFramesbyRGB(Frame prevFrame, Frame nextFrame){
+
+        int changeCount = 0;
+        int colorChanges;
+
+        int[] prevTable = prevFrame.getPixelRGBTable();
+        int[] nextTable = nextFrame.getPixelRGBTable();
+
+        int prevColor, nextColor;
+
+        int tableSize = prevTable.length;
+        int movementLimit = (int) (tableSize * 0.1);
+
+        for (int position = 0; position < tableSize; position++) {
+            colorChanges = 0;
+            prevColor = prevTable[position];
+            nextColor = nextTable[position];
+
+            if (Math.abs((prevColor & 0xFF) - (nextColor & 0xFF)) > 5){colorChanges++;}
+            if (Math.abs((prevColor >>> 8 & 0xFF) - (nextColor >>> 8 & 0xFF)) > 5){colorChanges++;}
+            if (Math.abs((prevColor >>> 16 & 0xFF) - (nextColor >>> 16 & 0xFF)) > 5){colorChanges++;}
+
+            if (colorChanges > 1){changeCount++;}
+        }
+
+        if (changeCount > movementLimit){
+            System.out.println(String.format("There is movement during frames %s and %s with respect to RGB", prevFrame.getFrameID(), nextFrame.getFrameID()));
+        }
+
+    }
+
+    public void compareFramesbyWBC(Frame prevFrame, Frame nextFrame){
+
+        int changeCount = 0;
+
+        int[] prevTable = prevFrame.getPixelWBCTable();
+        int[] nextTable = nextFrame.getPixelWBCTable();
+
+        int tableSize = prevTable.length;
+        int movementLimit = (int) (tableSize * 0.1);
+
+        for (int position = 0; position < tableSize; position++) {
+            if (prevTable[position] != nextTable[position]){changeCount++;}
+        }
+
+        if (changeCount > movementLimit){
+            System.out.println(String.format("There is movement during frames %s and %s with respect to WBC", prevFrame.getFrameID(), nextFrame.getFrameID()));
+        }
+
     }
 
 }

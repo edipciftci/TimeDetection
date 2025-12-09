@@ -14,8 +14,8 @@ public class Main {
         videoObject video = new videoObject(videoPath, vidDirPath, ROI);
 
         video.processImages();
-
-        video.getFrames()[0].printWBCTable();
+        video.compareAllFrames("RGB");
+        video.compareAllFrames("WBC");
 
     }
 }
