@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 
 public class ImageProcessor {
 
-    private videoObject video;
+    private final videoObject video;
 
     public ImageProcessor(videoObject video){
         this.video = video;
@@ -21,7 +21,7 @@ public class ImageProcessor {
         int height = img.getHeight();
         String[] parts = imgPath.split(File.separator);
         String ID = parts[parts.length - 1];
-        Frame frame = new Frame(ID, width, height);
+        Frame frame = new Frame(ID, width, height, this.video);
         this.video.addFrame(frame);
 
         int[] argb = img.getRGB(0, 0, width, height, null, 0, width);
@@ -36,9 +36,11 @@ public class ImageProcessor {
                 int g = (pixel >>> 8)  & 0xFF;
                 int b =  pixel         & 0xFF;
 
+                int brightness = (r+g+b) / 3;
+
                 int rgb = (r << 16) | (g << 8) | b;
 
-                frame.setPixelRGB(x, y, rgb);
+                frame.setPixelRGB(x, y, rgb, brightness);
             }
         }
         System.out.println(ID + " is added to the video object.");
