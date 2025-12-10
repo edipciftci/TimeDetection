@@ -58,7 +58,6 @@ public class ImageProcessor {
                 frame.setPixelRGB(x, y, rgb, brightness);
             }
         }
-        System.out.println(frame.getFrameID() + " is added to the video object.");
     }
 
 }

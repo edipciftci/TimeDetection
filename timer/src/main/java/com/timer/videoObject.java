@@ -79,7 +79,6 @@ public class videoObject {
 
     public void compareAllFrames(String method){
         int currIndex = 0;
-        System.out.println("Comparing frames by " + method);
         if (method.equals("RGB")){
             while (currIndex + 1 < this.frames.length){
                 Frame current = this.frames[currIndex];
@@ -95,6 +94,89 @@ public class videoObject {
                 Frame next = this.frames[currIndex + 1];
                 this.compareFramesbyWBC(current, next);
                 currIndex++;
+            }
+        }
+    }
+
+    public void compareAllFramesByRGB() throws InterruptedException {
+
+        if (this.frames == null || this.frames.length < 2) {
+            System.out.println("Video is too short to compute");
+            return;
+        }
+
+        final int pairCount = this.frames.length - 1; // (0,1), (1,2), ..., (n-2,n-1)
+        final int threadCount = 6;
+
+        Thread[] threads = new Thread[threadCount];
+
+        // how many pairs per thread (last one may get fewer)
+        final int chunkSize = (pairCount + threadCount - 1) / threadCount;
+
+        for (int t = 0; t < threadCount; t++) {
+            final int start = t * chunkSize;
+            if (start >= pairCount) {
+                threads[t] = null;
+                continue;
+            }
+            final int end = Math.min(start + chunkSize, pairCount); // exclusive
+
+            threads[t] = new Thread(() -> {
+                for (int i = start; i < end; i++) {
+                    Frame current = this.frames[i];
+                    Frame next    = this.frames[i + 1];
+                    compareFramesbyRGB(current, next);
+                }
+            }, "compare-thread-" + t);
+
+            threads[t].start();
+        }
+
+        // wait for all threads
+        for (Thread thread : threads) {
+            if (thread != null) {
+                thread.join();
+            }
+        }
+    }
+
+    public void compareAllFramesByWBC() throws InterruptedException {
+
+        if (this.frames == null || this.frames.length < 2) {
+            System.out.println("Video is too short to compute");
+            return;
+        }
+
+        final int pairCount = this.frames.length - 1; // (0,1), (1,2), ..., (n-2,n-1)
+        final int threadCount = 6;
+
+        Thread[] threads = new Thread[threadCount];
+
+        // how many pairs per thread (last one may get fewer)
+        final int chunkSize = (pairCount + threadCount - 1) / threadCount;
+
+        for (int t = 0; t < threadCount; t++) {
+            final int start = t * chunkSize;
+            if (start >= pairCount) {
+                threads[t] = null;
+                continue;
+            }
+            final int end = Math.min(start + chunkSize, pairCount); 
+
+            threads[t] = new Thread(() -> {
+                for (int i = start; i < end; i++) {
+                    Frame current = this.frames[i];
+                    Frame next    = this.frames[i + 1];
+                    compareFramesbyWBC(current, next);
+                }
+            }, "compare-thread-" + t);
+
+            threads[t].start();
+        }
+
+        for (Thread thread : threads) {
+            if (thread != null) {
+                thread.join();
             }
         }
     }
@@ -144,9 +226,9 @@ public class videoObject {
             if (prevTable[position] != nextTable[position]){changeCount++;}
         }
 
-        if (changeCount > movementLimit){
-            System.out.println(String.format("There is movement during frames %s and %s with respect to WBC", prevFrame.getFrameID(), nextFrame.getFrameID()));
-        }
+        // if (changeCount > movementLimit){
+        //     System.out.println(String.format("There is movement during frames %s and %s with respect to WBC", prevFrame.getFrameID(), nextFrame.getFrameID()));
+        // }
 
     }
 

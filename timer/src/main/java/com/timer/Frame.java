@@ -1,9 +1,5 @@
 package com.timer;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 /**
  * Class representing a single frame of video data.
  */
@@ -60,14 +56,14 @@ public class Frame {
      * @param brightness (int) Average brightness used to bucket color.
      */
     public void setPixelRGB(int xPos, int yPos, int RGB, int brightness){
-        this.pixelRGBTable[yPos*width + xPos] = RGB;
+        this.pixelRGBTable[yPos*this.width + xPos] = RGB;
         // Classify pixel into White/Black/Color based on brightness thresholds.
         if (brightness < 60){
-            this.pixelWBCTable[yPos*width + xPos] = -1; // Black : Threshold below 60
+            this.pixelWBCTable[yPos*this.width + xPos] = -1; // Black : Threshold below 60
         } else if (brightness > 200){
-            this.pixelWBCTable[yPos*width + xPos] = 1; // White : Threshold above 200
+            this.pixelWBCTable[yPos*this.width + xPos] = 1; // White : Threshold above 200
         } else {
-            this.pixelWBCTable[yPos*width + xPos] = 0; // Colored : In-between
+            this.pixelWBCTable[yPos*this.width + xPos] = 0; // Colored : In-between
         }
     }
 
