@@ -38,26 +38,26 @@ public class Main {
                 e.printStackTrace();
             }
         });
-        time("Compare By RGB " + limit + " Times", () -> {for (int i = 0; i < limit; i++) {
-            video.compareAllFrames("RGB");
-        }});
-        time("Compare By RGB " + limit + " Times - Multithread", () -> {for (int i = 0; i < limit; i++) {
-            try {
-                video.compareAllFramesByRGB();;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }});
-        time("Compare By WBC " + limit + " Times", () -> {for (int i = 0; i < limit; i++) {
-            video.compareAllFrames("WBC");
-        }});
-        time("Compare By WBC " + limit + " Times - Multithread", () -> {for (int i = 0; i < limit; i++) {
-            try {
-                video.compareAllFramesByWBC();;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }});
+        // time("Compare By RGB " + limit + " Times", () -> {for (int i = 0; i < limit; i++) {
+        //     video.compareAllFrames("RGB");
+        // }});
+        // time("Compare By RGB " + limit + " Times - Multithread", () -> {for (int i = 0; i < limit; i++) {
+        //     try {
+        //         video.compareAllFramesByRGB();;
+        //     } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        // }});
+        // time("Compare By WBC " + limit + " Times", () -> {for (int i = 0; i < limit; i++) {
+        //     video.compareAllFrames("WBC");
+        // }});
+        // time("Compare By WBC " + limit + " Times - Multithread", () -> {for (int i = 0; i < limit; i++) {
+        //     try {
+        //         video.compareAllFramesByWBC();;
+        //     } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        // }});
     }
 
 }

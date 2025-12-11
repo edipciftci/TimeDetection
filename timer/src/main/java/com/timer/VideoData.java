@@ -71,7 +71,7 @@ public class VideoData implements AutoCloseable {
         int ID = 0;
         while ((img = nextFrame()) != null) {
             tempFrame = new com.timer.Frame(String.format("FR_%06d", ID++), width, height, video);
-            processor.processImage(img.getSubimage(boundaries[0], boundaries[1], boundaries[2], boundaries[3]), tempFrame, width, height);
+            processor.processImage(img.getSubimage(boundaries[0], boundaries[1], width, height), tempFrame, width, height);
         }
 
     }
