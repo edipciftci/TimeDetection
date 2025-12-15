@@ -1,14 +1,18 @@
 package com.example.timer
 
 import android.content.Context
+import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RawRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.timer.logic.video_object
 import java.io.File
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val ROI = intArrayOf(110 , 120 , 320 , 330)
-        val videoFile: File = copyRawVideoToInternal(
+        val videoFile: File? = copyRawVideoToInternal(
             context = this,
             rawId = R.raw.test_video,
             fileName = "test_video.mp4"
@@ -38,24 +42,38 @@ class MainActivity : AppCompatActivity() {
         button2.setOnClickListener { video.compareAllFramesByWBC() }
         button3.setOnClickListener { video.processImages() }
         button4.setOnClickListener { onRunAllClicked() }
+
+        val recordButton = findViewById<Button>(R.id.newRecordButton)
+
+        recordButton.setOnClickListener { startActivity(Intent(this, RecordActivity::class.java)) }
     }
 
-    private fun copyRawVideoToInternal(context: Context, rawId: Int, fileName: String): File {
-        val outFile = context.getFileStreamPath(fileName)
-        if (outFile.exists()) return outFile
+    fun copyRawVideoToInternal(
+        context: Context,
+        @RawRes rawId: Int,
+        fileName: String
+    ): File? {
+        return try {
+            val outFile = File(context.filesDir, fileName)
 
-        context.resources.openRawResource(rawId).use { input ->
-            context.openFileOutput(fileName, Context.MODE_PRIVATE).use { output ->
-                val buffer = ByteArray(8 * 1024)
-                var bytes: Int
-                while (true) {
-                    bytes = input.read(buffer)
-                    if (bytes == -1) break
-                    output.write(buffer, 0, bytes)
+            // Only copy once; reuse if it already exists
+            if (!outFile.exists()) {
+                context.resources.openRawResource(rawId).use { input ->
+                    outFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
                 }
             }
+
+            if (outFile.exists()) outFile else null
+        } catch (e: Resources.NotFoundException) {
+            // rawId invalid (shouldn’t happen if it compiles)
+            e.printStackTrace()
+            null
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
         }
-        return outFile
     }
 
     private fun onRunAllClicked(){}

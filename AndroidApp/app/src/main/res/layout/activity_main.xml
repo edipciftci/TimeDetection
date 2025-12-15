@@ -36,10 +36,10 @@
 
             <!-- Example items -->
             <Button
-                android:id="@+id/menuItem1"
+                android:id="@+id/newRecordButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Menu Item 1" />
+                android:text="New Recording" />
 
             <Button
                 android:id="@+id/menuItem2"
