@@ -117,10 +117,12 @@ class RecordActivity : AppCompatActivity() {
                 when (event) {
                     is VideoRecordEvent.Start -> {
                         isRecording = true
+                        setRecordButtonRecording()
                         Log.d("RecordActivity", "Recording started: ${file.absolutePath}")
                     }
                     is VideoRecordEvent.Finalize -> {
                         isRecording = false
+                        setRecordButtonIdle()
                         activeRecording = null
 
                         if (event.error == VideoRecordEvent.Finalize.ERROR_NONE) {
@@ -145,6 +147,14 @@ class RecordActivity : AppCompatActivity() {
             return
         }
         activeRecording?.stop()
+    }
+
+    private fun setRecordButtonIdle() {
+        findViewById<ImageButton>(R.id.recordButton).setBackgroundResource(R.drawable.record_circle) // your normal circle drawable
+    }
+
+    private fun setRecordButtonRecording() {
+        findViewById<ImageButton>(R.id.recordButton).setBackgroundResource(R.drawable.record_square)
     }
 
     override fun onDestroy() {

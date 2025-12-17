@@ -10,12 +10,14 @@
         </shape>
     </item>
 
-    <item android:gravity="center">
-        <shape android:shape="oval">
-            <size
-                android:width="60dp"
-                android:height="60dp"/>
-            <solid android:color="#99FFFFFF" />
+    <!-- Inner white rounded square, centered -->
+    <item
+        android:width="45dp"
+        android:height="45dp"
+        android:gravity="center">
+        <shape android:shape="rectangle">
+            <solid android:color="#44FF9988"/>
+            <corners android:radius="10dp"/>
         </shape>
     </item>
 
